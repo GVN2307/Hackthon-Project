@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Red Pill — Dino Runner</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body class="game-page">
+  <header class="site-header">
+    <div class="logo"><a href="basic.html" style="color:inherit;text-decoration:none">Morpheus</a></div>
+    <nav class="nav"><a href="basic.html" class="nav-link">Back</a></nav>
+  </header>
+
+  <main class="game-wrap">
+    <div class="topbar">
+      <div class="hud">Tap / Space to jump • Mobile-friendly</div>
+      <div class="score" id="score">0</div>
+    </div>
+
+    <div class="canvas-shell">
+      <canvas id="gameCanvas" aria-label="Prehistoric runner game"></canvas>
+
+      <!-- mobile big tap area for jump -->
+      <button id="jumpBtn" class="jump-btn" aria-hidden="true"></button>
+
+      <!-- game over overlay -->
+      <div id="gameOver" class="game-over hidden" role="dialog" aria-live="polite">
+        <div class="game-over-card">
+          <div class="go-title">GAME OVER</div>
+          <div class="go-score" id="goScore">Score: 0</div>
+          <div class="go-actions">
+            <button id="tryAgain" class="btn primary">Try Again</button>
+            <a href="basic.html" class="btn subtle">Return</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint">Tip: Hold down touch or press arrow down to duck (optional)</div>
+  </main>
+
+  <script src="js/game.js" defer></script>
+</body>
+</html>

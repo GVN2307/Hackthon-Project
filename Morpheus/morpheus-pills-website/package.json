@@ -1,0 +1,29 @@
+{
+  "name": "morpheus-pills-website",
+  "version": "1.0.0",
+  "description": "A website featuring a user interface inspired by the Matrix, with interactive pills and a Dino-like game.",
+  "main": "src/index.html",
+  "scripts": {
+    "start": "live-server src",
+    "build": "echo 'Build process here'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "Matrix",
+    "Morpheus",
+    "pills",
+    "game",
+    "Dino"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "live-server": "^1.2.1"
+  },
+  "devDependencies": {},
+  "homepage": "https://yourwebsite.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/morpheus-pills-website.git"
+  }
+}

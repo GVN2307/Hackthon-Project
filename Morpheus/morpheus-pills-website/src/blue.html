@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Blue Pill — Wake Up</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body{background:#000;color:#00ff7f;font-family:monospace}
+    .wrap{padding:28px;display:flex;gap:24px;align-items:flex-start;max-width:1100px;margin:0 auto}
+    .hex-col{width:100%; background:
+      repeating-linear-gradient(90deg, rgba(0,255,127,0.03) 0 2px, transparent 2px 6px),
+      linear-gradient(180deg, rgba(0,255,127,0.02), rgba(0,255,127,0.01));
+     border-radius:12px;padding:18px;border:1px solid rgba(0,255,127,0.06)}
+    .retro{white-space:pre-wrap;font-size:15px;line-height:1.45; color:#b8ffd7; min-height:360px; overflow:auto; padding:12px}
+    @media (max-width:880px){
+      .wrap{flex-direction:column;padding:16px}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo"><a href="basic.html" style="color:inherit;text-decoration:none">Morpheus</a></div>
+    <nav class="nav">
+      <a href="basic.html" class="nav-link">Return</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <div class="hex-col" aria-live="polite">
+      <div class="retro" id="retroText" tabindex="0" title="Click to finish typing"></div>
+    </div>
+  </main>
+
+  <script>
+    // Elaborated message typed in retro style (restored)
+    const message = [
+`WAKE UP, YOUNG MAN.`,
+`This is not a polite suggestion — it is a clear invitation to shake off distraction and take command of your life.`,
+`The world you accept by default is softened by habit, shaped by other people's agendas, and driven by invisible systems.`,
+`If you keep drifting, your life will be steered by those systems, not by your intentions. This moment is your chance to change that.`,
+
+`Begin small. Choose one meaningful goal. Break it into daily actions. Protect those hours as if they were sacred.`,
+`Discipline outperforms talent when talent is unfocused. Habits compound more than bursts of inspiration. Build routines that defend your priorities.`,
+`Find mentors, learn with purpose, and measure progress honestly. Remove what dilutes attention: endless feeds, comfort without growth, busywork.`,
+
+`This may feel urgent because time is finite and choices accumulate. Own the responsibility now — focus, act, persist.`,
+`Commit, and the path will reveal itself: consistent effort, systems for learning, and the courage to fail forward.`,
+`Wake up. Own your time. Pursue what matters. The rest is noise.`,
+``,
+
+`— MORPHEUS`
+    ].join('\n\n');
+
+    const el = document.getElementById('retroText');
+    let idx = 0, timer = null;
+
+    function startTyping(text){
+      stopTyping();
+      idx = 0;
+      el.textContent = '';
+      step(text);
+    }
+
+    function step(text){
+      if (idx > text.length){
+        stopTyping();
+        return;
+      }
+      el.textContent = text.slice(0, idx);
+      idx++;
+      timer = setTimeout(()=> step(text), (text[idx-1] === ' ' || text[idx-1] === '\n') ? 18 : 34);
+    }
+
+    function stopTyping(){
+      if (timer){ clearTimeout(timer); timer = null; }
+    }
+
+    // begin on load
+    startTyping(message);
+
+    // click or keyboard to finish immediately
+    el.addEventListener('click', ()=>{
+      stopTyping();
+      el.textContent = message;
+      el.focus();
+    });
+    el.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter' || e.key === ' ') {
+        stopTyping();
+        el.textContent = message;
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>
