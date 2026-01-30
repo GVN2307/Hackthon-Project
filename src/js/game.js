@@ -38,9 +38,8 @@
   }
 
   // Matrix Rain Setup
-  const columns = Math.floor(canvas.width / 20);
-  const drops = [];
-  for (let x = 0; x < columns; x++) drops[x] = 1;
+  let columns = 0;
+  let drops = [];
 
   function drawMatrixRain(dt, speedMultiplier) {
     ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
@@ -68,6 +67,11 @@
     canvas.style.width = rect.width + 'px';
     canvas.style.height = rect.height + 'px';
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    // Re-init rain
+    columns = Math.floor(rect.width / 20);
+    drops = [];
+    for (let x = 0; x < columns; x++) drops[x] = Math.random() * canvas.height / 20;
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
