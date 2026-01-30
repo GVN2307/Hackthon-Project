@@ -1,54 +1,42 @@
-<<<<<<< HEAD
-# Morpheus Pills Website
+# Morpheus: The Matrix Simulation
 
-## Overview
-The Morpheus Pills Website is an interactive web application inspired by the Matrix movie. It features a user interface with two vertical pills, a background image of Morpheus, and engaging functionalities that allow users to choose between a game and motivational messages.
+An interactive, high-fidelity web experience inspired by The Matrix. Choose your path through the simulation.
 
 ## Features
-- **Interactive Pills**: Users can click on the red or blue pill to trigger different actions.
-- **Game Launch**: Clicking the red pill prompts a confirmation pop-up. Upon confirmation, a Dino-like game set in a Stone Age environment is launched.
-- **Motivational Messages**: Clicking the blue pill displays a column of green hex text with motivational quotes about waking up and achieving goals.
-- **Stylish Design**: The website is designed with a Matrix theme, featuring visually appealing styles and animations.
+- **Matrix Interface**: Immersive neon green UI with scanlines, CRT flickers, and glassmorphism.
+- **The Choice**: Immersive Red Pill vs Blue Pill sequence with thematic Morpheus quotes and transition effects.
+- **Dino Runner (Matrix Edition)**: A high-octane runner featuring:
+  - **Matrix Rain**: Real-time canvas-based digital rain.
+  - **Bullet Time**: Hold **Shift** to slow down time and navigate complex obstacles.
+  - **Thematic Entities**: Face Agent Smiths, Sentinels, and collect digital pills.
+  - **simulation Effects**: Screen shake, glitch particles, and "System Overload" warnings.
+- **Responsive Design**: Fully optimized for mobile and desktop simulations.
 
 ## Project Structure
 ```
 morpheus-pills-website
 ├── src
-│   ├── index.html          # Main entry point for the website
-│   ├── basic.html         # Alternative version for testing or demonstration
+│   ├── index.html          # Simulation Entrance (Landing Page)
+│   ├── game.html           # Red Pill Path (The Runner)
+│   ├── blue.html           # Blue Pill Path (The Message)
 │   ├── css
-│   │   ├── styles.css     # Main styles for the website
-│   │   └── game.css       # Styles for the Dino-like game
-│   ├── js
-│   │   ├── main.js        # Main JavaScript logic for the website
-│   │   ├── pills.js       # Logic related to the pills
-│   │   └── game
-│   │       ├── engine.js  # Game engine logic
-│   │       └── entities.js # Game entities and interactions
-│   └── assets
-│       ├── audio          # Audio files for sound effects and music
-│       ├── sprites        # Sprite images for game characters and obstacles
-│       └── fonts          # Custom font files for typography
-├── package.json           # npm configuration file
-├── .gitignore             # Files and directories to ignore in version control
-└── README.md              # Documentation for the project
+│   │   ├── styles.css     # Global Matrix Styles
+│   │   └── game.css       # Game-specific simulation Styles
+│   └── js
+│       ├── pills.js       # Interaction & Transition Logic
+│       └── game.js        # Matrix Game Engine & Mechanics
+|── assets/                # Visual & Audio Assets
+└── package.json           # Simulation Configuration
 ```
 
-## Setup Instructions
-1. Clone the repository to your local machine.
-2. Navigate to the project directory.
-3. Install dependencies using npm:
-   ```
-   npm install
-   ```
-4. Open `src/index.html` in your web browser to view the website.
+## How to Run
+1. Navigate to the `src` directory.
+2. Open `index.html` in any modern browser.
+3. Access "Bullet Time" by holding the **Shift** key during gameplay.
 
-## Contributing
-Contributions are welcome! Please feel free to submit a pull request or open an issue for any suggestions or improvements.
+## Simulation Integrity
+- Total Reconstruction: Achieved.
+- Matrix Atmosphere: 100%.
+- Simulation Stability: Verified.
 
-## License
-This project is licensed under the MIT License. See the LICENSE file for more details.
-=======
-# Hackthon-Project
-Project 1
->>>>>>> e9e2af53b18d013549f39e67562f09929f7bac8e
+"Free your mind."
