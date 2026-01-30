@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Morpheus Pills Website
 
 ## Overview
@@ -48,7 +47,3 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for more details.
-=======
-# Hackthon-Project
-Project 1
->>>>>>> e9e2af53b18d013549f39e67562f09929f7bac8e
