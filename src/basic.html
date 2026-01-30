@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -8,15 +9,55 @@
   <script src="js/pills.js" defer></script>
   <style>
     /* image container adjustments and robust fallback */
-    .morpheus { flex:0 0 360px; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:12px; min-height:320px; max-width:360px; background-color: #03111a; }
-    .morpheus img.morpheus-image { width:100%; height:100%; object-fit:cover; display:block; border-radius:12px; }
-    .morpheus.has-bg { background-size:cover; background-position:center; background-repeat:no-repeat; }
+    .morpheus {
+      flex: 0 0 360px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 0px;
+      min-height: 450px;
+      max-width: 360px;
+      background-color: #0D0208;
+      border: 1px solid var(--muted);
+    }
+
+    .morpheus img.morpheus-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 0px;
+    }
+
+    .morpheus.has-bg {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
     /* subtle overlay so pills panel still reads */
-    .morpheus::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(1,6,10,0.15), rgba(2,8,14,0.35)); pointer-events:none; border-radius:12px; }
+    .morpheus::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0, 255, 65, 0.05), rgba(0, 0, 0, 0.4));
+      pointer-events: none;
+      border-radius: 0px;
+    }
+
     /* preserve layout on small screens */
-    @media (max-width:420px){ .morpheus { min-width:220px; min-height:220px; max-width:260px } }
+    @media (max-width:420px) {
+      .morpheus {
+        min-width: 220px;
+        min-height: 220px;
+        max-width: 260px
+      }
+    }
   </style>
 </head>
+
 <body>
   <header class="site-header">
     <div class="logo">Morpheus</div>
@@ -30,14 +71,15 @@
           <source srcset="assets/morpheus.webp" type="image/webp">
           <source srcset="assets/morpheus.png" type="image/png">
           <source srcset="assets/morpheus.jpg" type="image/jpeg">
-          <img id="morpheusImg" class="morpheus-image" src="assets/morpheus.png" alt="Hooded silhouette" onerror="this.style.display='none';document.getElementById('morpheusBox').classList.add('has-bg');">
+          <img id="morpheusImg" class="morpheus-image" src="assets/morpheus.png" alt="Hooded silhouette"
+            onerror="this.style.display='none';document.getElementById('morpheusBox').classList.add('has-bg');">
         </picture>
         <div class="morpheus-silhouette" aria-hidden="true"></div>
       </div>
 
       <div class="panel centered">
-        <h1 class="title">Red Pill or Blue Pill</h1>
-        <p class="subtitle">Choose: step into a prehistoric runner, or wake up and see the matrix.</p>
+        <h1 class="title">FOLLOW THE WHITE RABBIT</h1>
+        <p class="subtitle">This is your last chance. After this, there is no turning back.</p>
 
         <div class="pills-row">
           <button id="red-pill" class="pill pill-vertical pill-red" aria-label="Red pill">
@@ -56,18 +98,18 @@
     <div class="confirm-card">
       <div id="confirm-text" class="typewriter"></div>
       <div class="confirm-actions">
-        <button id="confirm-no" class="btn subtle">No</button>
-        <button id="confirm-yes" class="btn primary">Yes</button>
+        <button id="confirm-no" class="btn subtle">STAY IN THE MATRIX</button>
+        <button id="confirm-yes" class="btn primary">ENTER THE WONDERLAND</button>
       </div>
     </div>
   </div>
 
   <footer class="site-footer">
-    <small>Built as a demo • Place assets/morpheus.webp / .png / .jpg for art</small>
+    <small>OPERATING SYSTEM: MATRIX 1.0.4 • CONNECTION SECURE</small>
   </footer>
 
   <script>
-    (function(){
+    (function () {
       // If <img> failed to load or file isn't present, try several candidate files before using SVG fallback.
       const box = document.getElementById('morpheusBox');
       const img = document.getElementById('morpheusImg');
@@ -84,18 +126,18 @@
           `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'>
             <defs>
               <linearGradient id='g' x1='0' x2='0' y1='0' y2='1'>
-                <stop offset='0' stop-color='#071426'/>
-                <stop offset='1' stop-color='#03111a'/>
+                <stop offset='0' stop-color='#0D0208'/>
+                <stop offset='1' stop-color='#003B00'/>
               </linearGradient>
             </defs>
             <rect width='100%' height='100%' fill='url(#g)'/>
-            <g transform='translate(120,60)' fill='#0b1b23'>
-              <ellipse cx='180' cy='340' rx='200' ry='90' fill='#051017' opacity='0.8'/>
-              <path d='M180 30 C120 40 90 110 90 170 C90 250 130 320 180 320 C230 320 270 250 270 170 C270 110 240 40 180 30 Z' fill='#071426' />
-              <circle cx='130' cy='160' r='8' fill='#0fc77a'/>
-              <circle cx='230' cy='160' r='8' fill='#ff6b6b'/>
-              <rect x='120' y='220' width='120' height='20' rx='10' fill='#021018' opacity='0.6'/>
-              <g transform='translate(70,20) scale(0.9)' fill='#081722' opacity='0.95'>
+            <g transform='translate(120,60)' fill='#001A00'>
+              <ellipse cx='180' cy='340' rx='200' ry='90' fill='#003B00' opacity='0.5'/>
+              <path d='M180 30 C120 40 90 110 90 170 C90 250 130 320 180 320 C230 320 270 250 270 170 C270 110 240 40 180 30 Z' fill='#0D0208' />
+              <circle cx='130' cy='160' r='10' fill='#00FF41' filter='blur(2px)'/>
+              <circle cx='230' cy='160' r='10' fill='#FF1A1A' filter='blur(2px)'/>
+              <rect x='120' y='220' width='120' height='20' rx='10' fill='#00FF41' opacity='0.2'/>
+              <g transform='translate(70,20) scale(0.9)' fill='#001A00' opacity='0.95'>
                 <path d='M80 40 C40 80 50 160 80 200 C110 240 170 240 200 200 C230 160 240 80 200 40 C160 0 100 0 80 40 Z'/>
               </g>
             </g>
@@ -105,9 +147,10 @@
         box.classList.add('has-bg');
       }
 
+
       // try to preload candidates; if one loads, show it; otherwise fallback to svg.
-      (async function tryCandidates(){
-        for (const p of candidates){
+      (async function tryCandidates() {
+        for (const p of candidates) {
           try {
             await new Promise((res, rej) => {
               const test = new Image();
@@ -121,7 +164,7 @@
             // hide <img> if using background to avoid double images
             if (img) img.style.display = 'none';
             return;
-          } catch(e){ /* try next */ }
+          } catch (e) { /* try next */ }
         }
         applySvgFallback();
       })();
@@ -133,4 +176,5 @@
     })();
   </script>
 </body>
+
 </html>
