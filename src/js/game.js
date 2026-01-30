@@ -56,6 +56,10 @@
     requestAnimationFrame(loop);
   }
 
+  let isDucking = false;
+  let bossPhase = false;
+  let bossTimer = 0;
+
   // Particles for glitch effect
   let particles = [];
   class Particle {
@@ -149,6 +153,8 @@
     timeScale = 1;
     activeSubroutines = { shield: 0, jumpBoost: 1, timeDilation: 1 };
     lastSubroutineScore = 0;
+    bossPhase = false;
+    isDucking = false;
     bulletTime = false;
     shakeTime = 0;
     player.y = GROUND_Y() - player.h;
@@ -186,14 +192,25 @@
     if (score % 200 === 0) speed = 7 + Math.floor(score / 500);
 
     // Subroutine trigger
-    if (score - lastSubroutineScore >= 500) {
+    if (score - lastSubroutineScore >= 500 && !bossPhase) {
       lastSubroutineScore = score;
       showSubroutineSelection();
       return;
     }
 
+    // Boss Phase Logic
+    if (score > 0 && score % 1500 < 50 && !bossPhase) {
+      bossPhase = true;
+      bossTimer = 10; // 10 seconds of boss
+    }
+
+    if (bossPhase) {
+      bossTimer -= effectiveDt;
+      if (bossTimer <= 0) bossPhase = false;
+    }
+
     spawnTimer += effectiveDt;
-    const spawnInterval = Math.max(0.6, 1.8 - Math.min(1.2, score / 2000));
+    const spawnInterval = bossPhase ? 0.4 : Math.max(0.6, 1.8 - Math.min(1.2, score / 2000));
     if (spawnTimer > spawnInterval) {
       spawnTimer = 0;
       spawnObstacle();
@@ -217,6 +234,15 @@
     for (let i = 0; i < obstacles.length; i++) {
       let ob = obstacles[i];
       if (rectsOverlap(player, ob)) {
+        // Counter logic: if ducking and it's an agent/sentinel, bypass
+        if (isDucking && (ob.type === 'agent' || ob.type === 'sentinel') && ob.x < player.x + 30) {
+          createGlitchBurst(ob.x, ob.y, '#0F0');
+          obstacles.splice(i, 1);
+          score += 100;
+          shakeTime = 5;
+          continue;
+        }
+
         if (activeSubroutines.shield > 0) {
           activeSubroutines.shield--;
           obstacles.splice(i, 1);
@@ -255,14 +281,20 @@
     ctx.shadowBlur = bulletTime ? 20 : 10;
     ctx.shadowColor = '#0F0';
 
-    // Head
-    ctx.fillRect(15, 0, 20, 15);
-    // Body (Long Coat)
-    ctx.fillRect(10, 15, 30, 40);
-    // Legs
-    const legOffset = (Math.sin(stepFrame / 4) + 1) * 3;
-    ctx.fillRect(12, 55, 10, 5 - (player.onGround ? legOffset / 2 : 0));
-    ctx.fillRect(28, 55, 10, 5 - (player.onGround ? -legOffset / 2 : 0));
+    if (isDucking) {
+      // Ducking pose
+      ctx.fillRect(15, 20, 20, 15); // Head lower
+      ctx.fillRect(10, 35, 30, 20); // Body compressed
+    } else {
+      // Head
+      ctx.fillRect(15, 0, 20, 15);
+      // Body (Long Coat)
+      ctx.fillRect(10, 15, 30, 40);
+      // Legs
+      const legOffset = (Math.sin(stepFrame / 4) + 1) * 3;
+      ctx.fillRect(12, 55, 10, 5 - (player.onGround ? legOffset / 2 : 0));
+      ctx.fillRect(28, 55, 10, 5 - (player.onGround ? -legOffset / 2 : 0));
+    }
 
     ctx.restore();
     ctx.shadowBlur = 0;
@@ -308,6 +340,15 @@
 
     // Matrix background
     drawMatrixRain(0.016, timeScale);
+
+    if (bossPhase) {
+      ctx.fillStyle = "rgba(255, 0, 0, 0.15)";
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "#F00";
+      ctx.font = "bold 24px monospace";
+      ctx.fillText("ROGUE AGENT SQUADRON DETECTED", w / 2 - 200, 40);
+      shakeTime = Math.max(shakeTime, 2);
+    }
 
     // Ground
     ctx.strokeStyle = '#0F0';
@@ -366,11 +407,13 @@
 
   window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.code === 'ArrowUp') { jump(); e.preventDefault(); }
+    if (e.code === 'ArrowDown' || e.code === 'KeyS') { isDucking = true; player.h = 30; }
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { bulletTime = true; }
     if (e.code === 'Enter' && gameOver) { restart(); }
   });
   window.addEventListener('keyup', (e) => {
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { bulletTime = false; }
+    if (e.code === 'ArrowDown' || e.code === 'KeyS') { isDucking = false; player.h = 60; }
   });
 
   canvas.addEventListener('mousedown', () => jump());
