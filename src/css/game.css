@@ -1,38 +1,171 @@
-:root{
-  --bg-white:#f7f7f7; --fg:#222;
-  --ground:#e9e9e9; --obs:#333; --accent:#111;
+:root {
+  --bg-black: #0D0208;
+  --fg-green: #00FF41;
+  --ground: #003B00;
+  --obs: #008F11;
+  --accent: #00FF41;
 }
+
 body {
-    background-color: #f0f0f0;
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
+  background-color: var(--bg-black);
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0;
+  padding: 0;
+  color: var(--fg-green);
+  overflow: hidden;
 }
 
-.game-page { background:var(--bg-white); color:var(--fg); min-height:100vh; display:flex; flex-direction:column; }
-.game-wrap{max-width:980px;margin:22px auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:6px 8px}
-.hud{font-size:14px;color:#666}
-.score{font-family:monospace;font-weight:700;color:#111}
+.game-page {
+  background: var(--bg-black);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
 
-/* canvas container to keep aspect ratio responsive */
-.canvas-shell{position:relative;background:linear-gradient(#fff,#f2f2f2);border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-#gameCanvas{display:block;width:100%;height:200px;border-radius:6px;background:linear-gradient(#fff,#f8f8f8);touch-action: manipulation}
+/* Scanline and Flicker */
+.game-page::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 10;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
 
-/* mobile jump big button (invisible but accessible) */
-.jump-btn{position:absolute;inset:0;border:0;background:transparent;opacity:0;}
+.game-wrap {
+  max-width: 980px;
+  margin: 22px auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 5;
+}
 
-/* Game over overlay */
-.game-over{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.65);backdrop-filter: blur(3px)}
-.game-over-card{background:var(--bg-white);border-radius:10px;padding:18px 22px;box-shadow:0 12px 36px rgba(0,0,0,0.15);text-align:center;border:1px solid #eee}
-.go-title{font-size:22px;font-weight:800;letter-spacing:2px;margin-bottom:6px}
-.go-score{font-family:monospace;margin-bottom:12px}
-.go-actions{display:flex;gap:10px;justify-content:center}
-.hidden{display:none}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--obs);
+  background: rgba(0, 0, 0, 0.8);
+}
 
-/* small screen tweaks */
-@media (max-width:520px){
-  #gameCanvas{height:160px}
-  .canvas-shell{padding:12px}
-  .game-wrap{margin:12px}
+.hud {
+  font-size: 14px;
+  color: var(--obs);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.score {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--fg-green);
+  font-size: 24px;
+  text-shadow: 0 0 10px var(--fg-green);
+}
+
+.canvas-shell {
+  position: relative;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid var(--obs);
+  border-radius: 0px;
+  padding: 5px;
+  box-shadow: 0 0 30px var(--ground);
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: 300px;
+  background: transparent;
+  touch-action: manipulation;
+}
+
+.jump-btn {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  opacity: 0;
+  z-index: 1;
+}
+
+.game-over {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  z-index: 20;
+}
+
+.game-over-card {
+  background: var(--bg-black);
+  border: 2px solid var(--fg-green);
+  padding: 40px;
+  box-shadow: 0 0 50px var(--ground);
+  text-align: center;
+}
+
+.go-title {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 8px;
+  margin-bottom: 20px;
+  color: var(--fg-green);
+  text-shadow: 0 0 20px var(--fg-green);
+}
+
+.go-score {
+  font-size: 24px;
+  font-family: 'Courier New', monospace;
+  margin-bottom: 30px;
+  color: var(--fg-green);
+}
+
+.go-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center
+}
+
+.hint {
+  color: var(--obs);
+  text-align: center;
+  margin-top: 10px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.hidden {
+  display: none
+}
+
+@media (max-width:520px) {
+  #gameCanvas {
+    height: 200px
+  }
+
+  .canvas-shell {
+    padding: 5px
+  }
+
+  .game-wrap {
+    margin: 10px
+  }
+
+  .go-title {
+    font-size: 28px;
+  }
 }
