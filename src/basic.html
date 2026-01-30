@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Morpheus Pills</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/pills.js" defer></script>
+  <style>
+    /* image container adjustments and robust fallback */
+    .morpheus { flex:0 0 360px; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:12px; min-height:320px; max-width:360px; background-color: #03111a; }
+    .morpheus img.morpheus-image { width:100%; height:100%; object-fit:cover; display:block; border-radius:12px; }
+    .morpheus.has-bg { background-size:cover; background-position:center; background-repeat:no-repeat; }
+    /* subtle overlay so pills panel still reads */
+    .morpheus::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(1,6,10,0.15), rgba(2,8,14,0.35)); pointer-events:none; border-radius:12px; }
+    /* preserve layout on small screens */
+    @media (max-width:420px){ .morpheus { min-width:220px; min-height:220px; max-width:260px } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">Morpheus</div>
+    <nav class="nav"><a href="basic.html" class="nav-link active">Home</a></nav>
+  </header>
+
+  <main class="layout">
+    <section class="card hero">
+      <div class="morpheus" id="morpheusBox" aria-hidden="true">
+        <picture>
+          <source srcset="assets/morpheus.webp" type="image/webp">
+          <source srcset="assets/morpheus.png" type="image/png">
+          <source srcset="assets/morpheus.jpg" type="image/jpeg">
+          <img id="morpheusImg" class="morpheus-image" src="assets/morpheus.png" alt="Hooded silhouette" onerror="this.style.display='none';document.getElementById('morpheusBox').classList.add('has-bg');">
+        </picture>
+        <div class="morpheus-silhouette" aria-hidden="true"></div>
+      </div>
+
+      <div class="panel centered">
+        <h1 class="title">Red Pill or Blue Pill</h1>
+        <p class="subtitle">Choose: step into a prehistoric runner, or wake up and see the matrix.</p>
+
+        <div class="pills-row">
+          <button id="red-pill" class="pill pill-vertical pill-red" aria-label="Red pill">
+            <span class="shine"></span><span class="pill-text">RED</span>
+          </button>
+
+          <button id="blue-pill" class="pill pill-vertical pill-blue" aria-label="Blue pill">
+            <span class="shine"></span><span class="pill-text">BLUE</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="confirm" class="confirm hidden" role="dialog" aria-modal="true">
+    <div class="confirm-card">
+      <div id="confirm-text" class="typewriter"></div>
+      <div class="confirm-actions">
+        <button id="confirm-no" class="btn subtle">No</button>
+        <button id="confirm-yes" class="btn primary">Yes</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <small>Built as a demo • Place assets/morpheus.webp / .png / .jpg for art</small>
+  </footer>
+
+  <script>
+    (function(){
+      // If <img> failed to load or file isn't present, try several candidate files before using SVG fallback.
+      const box = document.getElementById('morpheusBox');
+      const img = document.getElementById('morpheusImg');
+      const candidates = [
+        'assets/morpheus.webp',
+        'assets/morpheus.png',
+        'assets/morpheus.jpg',
+        'assets/morpheus-fallback.jpg'
+      ];
+
+      function applySvgFallback() {
+        // Generic hooded silhouette holding two pills (non-copyrighted abstract SVG)
+        const svg = encodeURIComponent(
+          `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'>
+            <defs>
+              <linearGradient id='g' x1='0' x2='0' y1='0' y2='1'>
+                <stop offset='0' stop-color='#071426'/>
+                <stop offset='1' stop-color='#03111a'/>
+              </linearGradient>
+            </defs>
+            <rect width='100%' height='100%' fill='url(#g)'/>
+            <g transform='translate(120,60)' fill='#0b1b23'>
+              <ellipse cx='180' cy='340' rx='200' ry='90' fill='#051017' opacity='0.8'/>
+              <path d='M180 30 C120 40 90 110 90 170 C90 250 130 320 180 320 C230 320 270 250 270 170 C270 110 240 40 180 30 Z' fill='#071426' />
+              <circle cx='130' cy='160' r='8' fill='#0fc77a'/>
+              <circle cx='230' cy='160' r='8' fill='#ff6b6b'/>
+              <rect x='120' y='220' width='120' height='20' rx='10' fill='#021018' opacity='0.6'/>
+              <g transform='translate(70,20) scale(0.9)' fill='#081722' opacity='0.95'>
+                <path d='M80 40 C40 80 50 160 80 200 C110 240 170 240 200 200 C230 160 240 80 200 40 C160 0 100 0 80 40 Z'/>
+              </g>
+            </g>
+          </svg>`
+        );
+        box.style.backgroundImage = `url("data:image/svg+xml;charset=utf-8,${svg}")`;
+        box.classList.add('has-bg');
+      }
+
+      // try to preload candidates; if one loads, show it; otherwise fallback to svg.
+      (async function tryCandidates(){
+        for (const p of candidates){
+          try {
+            await new Promise((res, rej) => {
+              const test = new Image();
+              test.onload = () => res(true);
+              test.onerror = () => rej(false);
+              test.src = p + '?v=' + Date.now();
+            });
+            // found valid image
+            box.style.backgroundImage = `url("${p}")`;
+            box.classList.add('has-bg');
+            // hide <img> if using background to avoid double images
+            if (img) img.style.display = 'none';
+            return;
+          } catch(e){ /* try next */ }
+        }
+        applySvgFallback();
+      })();
+
+      // If the <img> element exists but later errors, ensure fallback immediately
+      if (img) {
+        img.addEventListener('error', () => { applySvgFallback(); });
+      }
+    })();
+  </script>
+</body>
+</html>
