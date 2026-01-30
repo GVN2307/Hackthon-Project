@@ -10,6 +10,52 @@
   const tryAgain = document.getElementById('tryAgain');
   const jumpBtn = document.getElementById('jumpBtn');
 
+  const subOverlay = document.getElementById('subroutineOverlay');
+  const subOptions = document.getElementById('subroutineOptions');
+
+  const ALL_SUBROUTINES = [
+    { id: 'SHIELD', name: 'SHIELD.exe', desc: 'Ignore the next collision.', type: 'shield' },
+    { id: 'JUMP', name: 'LEAP.sys', desc: 'Significant jump height boost.', type: 'jump' },
+    { id: 'TIME', name: 'TIME.dll', desc: 'Bullet Time lasts 50% longer.', type: 'time' },
+    { id: 'SPEED', name: 'TURBO.cmd', desc: 'Increase base speed by 20%.', type: 'speed' }
+  ];
+
+  let activeSubroutines = { shield: 0, jumpBoost: 1, timeDilation: 1 };
+  let lastSubroutineScore = 0;
+
+  function showSubroutineSelection() {
+    running = false;
+    subOverlay.classList.remove('hidden');
+    subOptions.innerHTML = '';
+
+    // Pick 3 random
+    const shuffled = [...ALL_SUBROUTINES].sort(() => 0.5 - Math.random());
+    const picked = shuffled.slice(0, 3);
+
+    picked.forEach(sr => {
+      const btn = document.createElement('div');
+      btn.className = 'sr-option';
+      btn.innerHTML = `
+        <div class="sr-name">${sr.name}</div>
+        <div class="sr-desc">${sr.desc}</div>
+      `;
+      btn.onclick = () => applySubroutine(sr);
+      subOptions.appendChild(btn);
+    });
+  }
+
+  function applySubroutine(sr) {
+    if (sr.id === 'SHIELD') activeSubroutines.shield++;
+    if (sr.id === 'JUMP') activeSubroutines.jumpBoost += 0.2;
+    if (sr.id === 'TIME') activeSubroutines.timeDilation += 0.5;
+    if (sr.id === 'SPEED') speed *= 1.2;
+
+    subOverlay.classList.add('hidden');
+    running = true;
+    lastTime = performance.now();
+    requestAnimationFrame(loop);
+  }
+
   // Particles for glitch effect
   let particles = [];
   class Particle {
@@ -101,12 +147,15 @@
     running = true;
     gameOver = false;
     timeScale = 1;
+    activeSubroutines = { shield: 0, jumpBoost: 1, timeDilation: 1 };
+    lastSubroutineScore = 0;
     bulletTime = false;
     shakeTime = 0;
     player.y = GROUND_Y() - player.h;
     player.vy = 0;
     player.onGround = true;
     go.classList.add('hidden');
+    subOverlay.classList.add('hidden');
   }
 
   function spawnObstacle() {
@@ -136,6 +185,13 @@
     score += Math.floor(dt * 60);
     if (score % 200 === 0) speed = 7 + Math.floor(score / 500);
 
+    // Subroutine trigger
+    if (score - lastSubroutineScore >= 500) {
+      lastSubroutineScore = score;
+      showSubroutineSelection();
+      return;
+    }
+
     spawnTimer += effectiveDt;
     const spawnInterval = Math.max(0.6, 1.8 - Math.min(1.2, score / 2000));
     if (spawnTimer > spawnInterval) {
@@ -158,8 +214,16 @@
     obstacles = obstacles.filter(o => o.x + o.w > -50);
 
     // collision
-    for (let ob of obstacles) {
+    for (let i = 0; i < obstacles.length; i++) {
+      let ob = obstacles[i];
       if (rectsOverlap(player, ob)) {
+        if (activeSubroutines.shield > 0) {
+          activeSubroutines.shield--;
+          obstacles.splice(i, 1);
+          createGlitchBurst(ob.x, ob.y, '#0F0');
+          shakeTime = 5;
+          continue;
+        }
         running = false;
         gameOver = true;
         createGlitchBurst(player.x + 25, player.y + 30, '#0F0');
@@ -291,7 +355,7 @@
   function jump() {
     if (gameOver) return;
     if (player.onGround) {
-      player.vy = -600;
+      player.vy = -600 * activeSubroutines.jumpBoost;
       player.onGround = false;
     }
   }

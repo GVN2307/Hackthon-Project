@@ -37,10 +37,19 @@
             <a href="index.html" class="btn subtle">Return</a>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="hint">Tip: Hold down touch or press arrow down to duck (optional)</div>
+        <!-- Subroutine (Power-up) overlay -->
+        <div id="subroutineOverlay" class="game-over hidden" role="dialog" aria-live="polite">
+          <div class="game-over-card subroutine-card">
+            <div class="go-title">SUBROUTINE LOADED</div>
+            <div class="subtitle" style="margin-bottom: 20px;">Select a modification to initialize:</div>
+            <div id="subroutineOptions" class="card-options">
+              <!-- Cards will be injected here -->
+            </div>
+          </div>
+        </div>
+
+        <div class="hint">Tip: Hold down touch or press arrow down to duck (optional)</div>
   </main>
 
   <script src="js/game.js" defer></script>
