@@ -43,13 +43,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 50);
   }
 
+  function showLoadingSequence(target, cb) {
+    const overlay = document.createElement('div');
+    overlay.className = 'neural-load';
+    overlay.innerHTML = `
+      <div class="load-text">NEURAL LOAD INITIATED</div>
+      <div class="load-bar-wrap"><div class="load-bar" id="loadBar"></div></div>
+      <div class="load-code" id="loadCode"></div>
+    `;
+    document.body.appendChild(overlay);
+
+    const bar = document.getElementById('loadBar');
+    const code = document.getElementById('loadCode');
+    const fragments = [
+      "0x4F2A: LOADING SYSTEM_CORE...",
+      "0x99A1: MOUNTING VIRTUAL_ENV...",
+      "0x112C: BYPASSING ENCRYPTION...",
+      "0xDD34: ESTABLISHING NEURAL LINK...",
+      "0x55B2: UPLOADING SUBROUTINES...",
+      "0xEE11: STABILIZING FRAMEWORK..."
+    ];
+
+    let i = 0;
+    const t = setInterval(() => {
+      code.textContent += fragments[i++ % fragments.length] + '\n';
+      code.scrollTop = code.scrollHeight;
+    }, 300);
+
+    setTimeout(() => { bar.style.width = '100%'; }, 100);
+
+    setTimeout(() => {
+      clearInterval(t);
+      location.href = target;
+    }, 2200);
+  }
+
   red.addEventListener('click', () => {
     confirm.classList.remove('hidden');
     const quote = quotes[Math.floor(Math.random() * quotes.length)];
     typeWriter(confirmText, `\"${quote}\"\n\nYou take the red pill, you stay in Wonderland, and I show you how deep the rabbit hole goes.`, 25);
     yes.onclick = () => {
+      confirm.classList.add('hidden');
       flashScreen('#ff1a1a', 500, () => {
-        location.href = 'game.html';
+        showLoadingSequence('game.html');
       });
     };
   });
@@ -58,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   blue.addEventListener('click', () => {
     flashScreen('#1a1aff', 500, () => {
-      location.href = 'blue.html';
+      showLoadingSequence('blue.html');
     });
   });
 
