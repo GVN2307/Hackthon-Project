@@ -39,7 +39,10 @@
         <div class="sr-name">${sr.name}</div>
         <div class="sr-desc">${sr.desc}</div>
       `;
-      btn.onclick = () => applySubroutine(sr);
+      btn.onclick = () => {
+        logEvent(`INITIALIZING ${sr.name}`);
+        applySubroutine(sr);
+      };
       subOptions.appendChild(btn);
     });
   }
@@ -87,25 +90,39 @@
     for (let i = 0; i < 15; i++) particles.push(new Particle(x, y, color));
   }
 
-  // Matrix Rain Setup
-  let columns = 0;
-  let drops = [];
+  // Professional HUD: Terminal Logging
+  const simLog = document.getElementById('simLog');
+  function logEvent(msg) {
+    const div = document.createElement('div');
+    div.textContent = `[${new Date().toLocaleTimeString().split(' ')[0]}] ${msg}`;
+    simLog.prepend(div);
+    if (simLog.children.length > 5) simLog.removeChild(simLog.lastChild);
+  }
+
+  // Multi-layer Parallax Matrix Rain
+  let rainLayers = [
+    { drops: [], color: "rgba(0, 143, 17, 0.05)", speed: 0.2, fontSize: 10 },
+    { drops: [], color: "rgba(0, 255, 65, 0.1)", speed: 0.5, fontSize: 14 },
+    { drops: [], color: "rgba(0, 255, 65, 0.2)", speed: 1.2, fontSize: 20 }
+  ];
 
   function drawMatrixRain(dt, speedMultiplier) {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#0F0";
-    ctx.font = "15px monospace";
 
-    for (let i = 0; i < drops.length; i++) {
-      const text = String.fromCharCode(Math.random() * 128);
-      ctx.fillText(text, i * 20, drops[i] * 20);
+    rainLayers.forEach(layer => {
+      ctx.fillStyle = layer.color;
+      ctx.font = `${layer.fontSize}px monospace`;
+      for (let i = 0; i < layer.drops.length; i++) {
+        const text = String.fromCharCode(Math.random() * 128);
+        ctx.fillText(text, i * (layer.fontSize + 5), layer.drops[i] * layer.fontSize);
 
-      if (drops[i] * 20 > canvas.height && Math.random() > 0.975) {
-        drops[i] = 0;
+        if (layer.drops[i] * layer.fontSize > canvas.height && Math.random() > 0.975) {
+          layer.drops[i] = 0;
+        }
+        layer.drops[i] += layer.speed * speedMultiplier;
       }
-      drops[i] += 0.5 * speedMultiplier;
-    }
+    });
   }
 
   // HiDPI setup
@@ -118,10 +135,12 @@
     canvas.style.height = rect.height + 'px';
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-    // Re-init rain
-    columns = Math.floor(rect.width / 20);
-    drops = [];
-    for (let x = 0; x < columns; x++) drops[x] = Math.random() * canvas.height / 20;
+    // Re-init rain layers
+    rainLayers.forEach(layer => {
+      const cols = Math.floor(rect.width / (layer.fontSize + 5));
+      layer.drops = [];
+      for (let x = 0; x < cols; x++) layer.drops[x] = Math.random() * canvas.height / layer.fontSize;
+    });
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
@@ -202,11 +221,15 @@
     if (score > 0 && score % 1500 < 50 && !bossPhase) {
       bossPhase = true;
       bossTimer = 10; // 10 seconds of boss
+      logEvent("WARNING: ROGUE AGENT DETECTION");
     }
 
     if (bossPhase) {
       bossTimer -= effectiveDt;
-      if (bossTimer <= 0) bossPhase = false;
+      if (bossTimer <= 0) {
+        bossPhase = false;
+        logEvent("SIMULATION STABILIZED");
+      }
     }
 
     spawnTimer += effectiveDt;
@@ -240,6 +263,7 @@
           obstacles.splice(i, 1);
           score += 100;
           shakeTime = 5;
+          logEvent("COMBAT: AGENT BYPASSED");
           continue;
         }
 
@@ -248,6 +272,7 @@
           obstacles.splice(i, 1);
           createGlitchBurst(ob.x, ob.y, '#0F0');
           shakeTime = 5;
+          logEvent("SHIELD: COLLISION ABSORBED");
           continue;
         }
         running = false;
@@ -398,6 +423,7 @@
     if (player.onGround) {
       player.vy = -600 * activeSubroutines.jumpBoost;
       player.onGround = false;
+      logEvent("NEURAL LINK: JUMP_INIT");
     }
   }
   function restart() {
