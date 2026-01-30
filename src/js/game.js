@@ -1,5 +1,5 @@
-/* Responsive Chromebook-style Dino runner (simple) */
-/* Controls: Space / Up to jump, Down to duck. Tap on mobile to jump. On death, overlay asks to try again. */
+/* Matrix-style Dino runner */
+/* Controls: Space / Up to jump, Shift for Bullet Time. Tap on mobile to jump. */
 
 (function(){
   const canvas = document.getElementById('gameCanvas');
@@ -9,6 +9,28 @@
   const goScore = document.getElementById('goScore');
   const tryAgain = document.getElementById('tryAgain');
   const jumpBtn = document.getElementById('jumpBtn');
+
+  // Matrix Rain Setup
+  const columns = Math.floor(canvas.width / 20);
+  const drops = [];
+  for (let x = 0; x < columns; x++) drops[x] = 1;
+
+  function drawMatrixRain(dt, speedMultiplier) {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#0F0";
+    ctx.font = "15px monospace";
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = String.fromCharCode(Math.random() * 128);
+      ctx.fillText(text, i * 20, drops[i] * 20);
+
+      if (drops[i] * 20 > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i] += 0.5 * speedMultiplier;
+    }
+  }
 
   // HiDPI setup
   function resizeCanvas(){
@@ -25,9 +47,9 @@
 
   // world
   const GROUND_Y = () => canvas.height / (window.devicePixelRatio || 1) - 28;
-  let player = { x: 40, y: 0, w: 44, h: 44, vy:0, onGround:true, duck:false };
-  let speed = 6; // base speed (pixels per frame scaled)
-  let gravity = 1600; // px/s^2
+  let player = { x: 80, y: 0, w: 50, h: 60, vy:0, onGround:true };
+  let speed = 7;
+  let gravity = 1800; // px/s^2
   let obstacles = [];
   let spawnTimer = 0;
   let score = 0;
@@ -35,49 +57,61 @@
   let lastTime = performance.now();
   let gameOver = false;
   let stepFrame = 0;
+  let bulletTime = false;
+  let timeScale = 1;
 
   function reset(){
     obstacles = [];
     spawnTimer = 0;
     score = 0;
-    speed = 6;
+    speed = 7;
     running = true;
     gameOver = false;
+    timeScale = 1;
+    bulletTime = false;
     player.y = GROUND_Y() - player.h;
     player.vy = 0;
     player.onGround = true;
     go.classList.add('hidden');
   }
 
-  // spawn cactus-like obstacles
   function spawnObstacle(){
     const types = [
-      {w:18,h:36}, {w:28,h:44}, {w:38,h:56}
+      {w:30, h:70, type:'agent'}, 
+      {w:60, h:40, type:'sentinel'},
+      {w:20, h:50, type:'pill'}
     ];
     const t = types[Math.floor(Math.random()*types.length)];
-    obstacles.push({ x: canvas.width / (window.devicePixelRatio || 1) + 20, y: GROUND_Y() - t.h, w: t.w, h: t.h });
+    obstacles.push({ 
+      x: canvas.width / (window.devicePixelRatio || 1) + 50, 
+      y: GROUND_Y() - t.h - (t.type === 'sentinel' ? 40 : 0), // Sentinels fly
+      w: t.w, h: t.h, type: t.type 
+    });
   }
 
   function rectsOverlap(a,b){ return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 
   function update(dt){
     if (!running) return;
-    // score & speedup
-    score += Math.floor(dt * 60 * 1.2);
-    if (score % 100 === 0) speed = 6 + Math.floor(score / 200);
 
-    spawnTimer += dt;
-    const spawnInterval = Math.max(0.6, 1.6 - Math.min(1.0, score/1000));
+    // Bullet time logic
+    const targetScale = bulletTime ? 0.3 : 1.0;
+    timeScale += (targetScale - timeScale) * 0.1;
+    const effectiveDt = dt * timeScale;
+
+    score += Math.floor(dt * 60);
+    if (score % 200 === 0) speed = 7 + Math.floor(score / 500);
+
+    spawnTimer += effectiveDt;
+    const spawnInterval = Math.max(0.6, 1.8 - Math.min(1.2, score/2000));
     if (spawnTimer > spawnInterval){
       spawnTimer = 0;
       spawnObstacle();
-      // occasional double gap
-      if (Math.random() < 0.18) spawnObstacle();
     }
 
     // physics
-    player.vy += gravity * dt;
-    player.y += player.vy * dt;
+    player.vy += gravity * effectiveDt;
+    player.y += player.vy * effectiveDt;
     if (player.y + player.h >= GROUND_Y()){
       player.y = GROUND_Y() - player.h;
       player.vy = 0;
@@ -85,8 +119,8 @@
     } else player.onGround = false;
 
     // move obstacles
-    const pxPerSec = speed * 60; // convert to px/sec reference
-    for (let ob of obstacles) ob.x -= pxPerSec * dt;
+    const pxPerSec = speed * 60;
+    for (let ob of obstacles) ob.x -= pxPerSec * effectiveDt;
     obstacles = obstacles.filter(o => o.x + o.w > -50);
 
     // collision
@@ -105,67 +139,77 @@
     tryAgain.focus();
   }
 
-  function drawGround(){
-    const w = canvas.width / (window.devicePixelRatio || 1);
-    const h = canvas.height / (window.devicePixelRatio || 1);
-    const groundY = GROUND_Y();
-    // sky/ground split like chrome
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0,0,w,h);
-    // ground line with repeating ticks
-    ctx.fillStyle = '#e9e9e9';
-    ctx.fillRect(0, groundY + player.h, w, 8);
-    ctx.strokeStyle = '#ddd';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (let x = - (Math.floor(stepFrame) % 20); x < w + 20; x += 20){
-      ctx.moveTo(x, groundY + 8);
-      ctx.lineTo(x + 10, groundY);
-    }
-    ctx.stroke();
-  }
-
   function drawPlayer(){
     const p = player;
-    // body
-    ctx.fillStyle = '#111';
-    const cornerRadius = 6;
-    roundRect(ctx, p.x, p.y, p.w, p.h, cornerRadius, true);
-    // eye
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(p.x + p.w - 12, p.y + 8, 6, 6);
-    // simple leg animation
-    ctx.fillStyle = '#111';
-    const legHeight = player.onGround ? 10 : 6;
-    const legOffset = (Math.sin(stepFrame / 6) + 1) * 2;
-    ctx.fillRect(p.x + 10, p.y + p.h - legHeight + (player.onGround ? legOffset : 0), 10, legHeight);
-    ctx.fillRect(p.x + 24, p.y + p.h - legHeight + (player.onGround ? -legOffset : 0), 10, legHeight);
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    
+    // Neo Silhouette
+    ctx.fillStyle = bulletTime ? '#0F0' : '#FFF';
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#0F0';
+    
+    // Head
+    ctx.fillRect(15, 0, 20, 15);
+    // Body (Long Coat)
+    ctx.fillRect(10, 15, 30, 40);
+    // Legs
+    const legOffset = (Math.sin(stepFrame / 4) + 1) * 3;
+    ctx.fillRect(12, 55, 10, 5 - (player.onGround ? legOffset/2 : 0));
+    ctx.fillRect(28, 55, 10, 5 - (player.onGround ? -legOffset/2 : 0));
+    
+    ctx.restore();
+    ctx.shadowBlur = 0;
   }
 
   function drawObstacles(){
-    ctx.fillStyle = '#111';
     for (let ob of obstacles){
-      // cactus body with simple spikes
-      roundRect(ctx, ob.x, ob.y, ob.w, ob.h, 4, true);
-      ctx.fillStyle = '#fff';
-      ctx.globalAlpha = 0.06;
-      ctx.fillRect(ob.x + 2, ob.y + 6, ob.w * 0.6, ob.h * 0.12);
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = '#111';
+      ctx.save();
+      ctx.translate(ob.x, ob.y);
+      
+      if (ob.type === 'agent') {
+        ctx.fillStyle = '#f00'; // Red highlight for Smith
+        ctx.fillRect(0, 0, ob.w, ob.h);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(5, 5, ob.w - 10, ob.h - 10);
+      } else if (ob.type === 'sentinel') {
+        ctx.fillStyle = '#888';
+        ctx.beginPath();
+        ctx.ellipse(ob.w/2, ob.h/2, ob.w/2, ob.h/2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f00';
+        ctx.fillRect(ob.w/2 - 2, 5, 4, 4);
+      } else {
+        ctx.fillStyle = '#0F0';
+        ctx.fillRect(0, 0, ob.w, ob.h);
+      }
+      
+      ctx.restore();
     }
   }
 
   function draw(){
     const w = canvas.width / (window.devicePixelRatio || 1);
     const h = canvas.height / (window.devicePixelRatio || 1);
-    ctx.clearRect(0,0,w,h);
-    drawGround();
+    
+    // Matrix background
+    drawMatrixRain(0.016, timeScale);
+    
+    // Ground
+    ctx.strokeStyle = '#0F0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y());
+    ctx.lineTo(w, GROUND_Y());
+    ctx.stroke();
+
     drawPlayer();
     drawObstacles();
-    // score top-right
-    ctx.fillStyle = '#111';
-    ctx.font = '16px monospace';
-    ctx.fillText('' + score, w - 90, 24);
+    
+    if (bulletTime) {
+      ctx.fillStyle = "rgba(0, 255, 65, 0.1)";
+      ctx.fillRect(0, 0, w, h);
+    }
   }
 
   function loop(now){
@@ -173,42 +217,18 @@
     lastTime = now;
     if (running){
       update(dt);
-      stepFrame++;
-      resizeCanvasIfNeeded();
+      stepFrame += timeScale;
       draw();
       scoreEl.textContent = score;
     }
     requestAnimationFrame(loop);
   }
 
-  function resizeCanvasIfNeeded(){
-    // ensure canvas has a sensible height vs width; prefers width, fixed height
-    const shellRect = canvas.getBoundingClientRect();
-    if (canvas.height !== Math.round(shellRect.height * (window.devicePixelRatio || 1)) ||
-        canvas.width !== Math.round(shellRect.width * (window.devicePixelRatio || 1))){
-      resizeCanvas();
-      // re-place player on ground after resize
-      player.y = GROUND_Y() - player.h;
-    }
-  }
-
-  // utilities
-  function roundRect(ctx, x, y, w, h, r, fill){
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-    if (fill) ctx.fill();
-  }
-
   // controls
   function jump(){
     if (gameOver) return;
     if (player.onGround){
-      player.vy = -520; // jump impulse
+      player.vy = -600;
       player.onGround = false;
     }
   }
@@ -217,24 +237,20 @@
     lastTime = performance.now();
   }
 
-  // keyboard
   window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.code === 'ArrowUp') { jump(); e.preventDefault(); }
-    if (e.code === 'ArrowDown') { /* duck (not implemented) */ }
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { bulletTime = true; }
     if (e.code === 'Enter' && gameOver) { restart(); }
   });
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { bulletTime = false; }
+  });
 
-  // mouse/canvas click
   canvas.addEventListener('mousedown', ()=> jump());
-  // mobile jump large button
   jumpBtn.addEventListener('touchstart', (e)=> { e.preventDefault(); jump(); }, {passive:false});
   jumpBtn.addEventListener('click', ()=> jump());
-
-  // try again
   tryAgain.addEventListener('click', ()=> restart());
 
-  // initial placement and start
   reset();
   requestAnimationFrame(loop);
-
 })();
